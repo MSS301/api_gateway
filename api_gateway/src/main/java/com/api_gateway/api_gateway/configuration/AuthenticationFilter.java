@@ -37,10 +37,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-        "/hello",
-        "hello",
         "/auth-service/hello",
-        "auth-service/hello"
+        "/auth/token",
+            "/auth-service/auth/introspect"
     };
 
     @Value("${app.api-prefix}")
@@ -49,14 +48,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info("=== NEW AUTHENTICATION FILTER - ALLOWING ALL REQUESTS ===");
+        log.info("=== AUTHENTICATION FILTER ===");
         log.info("Request path: {}", exchange.getRequest().getURI().getPath());
         log.info("Request method: {}", exchange.getRequest().getMethod());
-        
-        // Allow all requests for testing
-        return chain.filter(exchange);
 
-        /* Original authentication logic - commented out for testing
         if (isPublicEndpoint(exchange.getRequest())) {
             log.info("Public endpoint detected, allowing request");
             return chain.filter(exchange);
@@ -76,7 +71,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             else
                 return unauthenticated(exchange.getResponse());
         }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
-        */
     }
 
     @Override
@@ -87,7 +81,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private boolean isPublicEndpoint(ServerHttpRequest request){
         String path = request.getURI().getPath();
         log.info("Checking path: {} against public endpoints", path);
-        
+
         return Arrays.stream(publicEndpoints)
                 .anyMatch(s -> path.endsWith(s) || path.contains(s));
     }
