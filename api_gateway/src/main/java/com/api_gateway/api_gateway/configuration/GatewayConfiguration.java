@@ -11,9 +11,32 @@ public class GatewayConfiguration {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
+                // ========== Auth Service Routes ==========
                 .route("auth-service", r -> r.path("/auth-service/**")
+                        .and()
+                        .not(p -> p.path("/auth-service/v3/api-docs/**"))
                         .filters(f -> f.rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}"))
                         .uri("lb://auth-service"))
+
+                // ========== Content Service Routes ==========
+                .route("content-service", r -> r.path("/content-service/**")
+                        .and()
+                        .not(p -> p.path("/content-service/v3/api-docs/**"))
+                        .filters(f -> f.rewritePath("/content-service/(?<segment>.*)", "/content/${segment}"))
+                        .uri("lb://content-service"))
+
+                // ========== OpenAPI Documentation Routes ==========
+
+                // Auth Service OpenAPI
+                .route("auth-service-openapi", r -> r.path("/auth-service/v3/api-docs/**")
+                        .filters(f -> f.rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}"))
+                        .uri("lb://auth-service"))
+
+                // Content Service OpenAPI
+                .route("content-service-openapi", r -> r.path("/content-service/v3/api-docs/**")
+                        .filters(f -> f.rewritePath("/content-service/(?<segment>.*)", "/content/${segment}"))
+                        .uri("lb://content-service"))
+
                 .build();
     }
 }
