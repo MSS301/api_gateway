@@ -25,6 +25,13 @@ public class GatewayConfiguration {
                         .filters(f -> f.rewritePath("/content-service/(?<segment>.*)", "/content/${segment}"))
                         .uri("lb://content-service"))
 
+                // ========== Payment Service Routes ==========
+                .route("payment-service", r -> r.path("/payment-service/**")
+                        .and()
+                        .not(p -> p.path("/payment-service/v3/api-docs/**"))
+                        .filters(f -> f.rewritePath("/payment-service/(?<segment>.*)", "/payment/${segment}"))
+                        .uri("lb://payment-service"))
+
                 // ========== OpenAPI Documentation Routes ==========
 
                 // Auth Service OpenAPI
@@ -36,6 +43,11 @@ public class GatewayConfiguration {
                 .route("content-service-openapi", r -> r.path("/content-service/v3/api-docs/**")
                         .filters(f -> f.rewritePath("/content-service/(?<segment>.*)", "/content/${segment}"))
                         .uri("lb://content-service"))
+
+                // Payment Service OpenAPI
+                .route("payment-service-openapi", r -> r.path("/payment-service/v3/api-docs/**")
+                        .filters(f -> f.rewritePath("/payment-service/(?<segment>.*)", "/payment/${segment}"))
+                        .uri("lb://payment-service"))
 
                 .build();
     }
