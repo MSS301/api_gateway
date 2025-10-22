@@ -66,9 +66,11 @@ mvn clean install
 
 ### Configure Environment (Optional)
 
-Copy `application.example.yml` → `application.yml` and update with your settings (see [Configuration](#configuration)).
+Copy `.env.example` → `.env` instruction if env not work: link (https://drive.google.com/drive/folders/1gvLupFafEiIawT8r3zC2EZoUc3K0NXjB?usp=sharing).
 
 ---
+
+
 
 ## Running the Application
 
