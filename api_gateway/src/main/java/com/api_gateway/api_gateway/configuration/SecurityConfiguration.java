@@ -32,6 +32,18 @@ public class SecurityConfiguration {
             "/auth-service/auth/introspect",
             "/auth-service/auth/refresh",
             "/auth-service/users", // POST only (registration)
+            "/auth-service/auth/email-verification",
+            "/auth-service/auth/resend-verification",
+            "/auth-service/auth/google",
+            "/auth-service/login/oauth2/code/google",
+            // OAuth2 endpoints - MUST be before any authenticated patterns
+            "/auth-service/login/**",
+            "/auth-service/oauth2/**",
+            "/auth-service/auth/google/**",
+
+            // Direct auth service access (when bypassing gateway)
+            "/login/**",
+            "/oauth2/**",
 
             // Payment Service - Webhooks (must be public for external services)
             "/payment-service/payment/webhook",
@@ -50,7 +62,10 @@ public class SecurityConfiguration {
 
             // Health checks
             "/*/actuator/health",
-            "/actuator/**"
+            "/actuator/**",
+
+            // Favicon
+            "/favicon.ico"
     };
 
     @Bean
