@@ -1,5 +1,6 @@
 package com.api_gateway.api_gateway.configuration;
 
+import com.api_gateway.api_gateway.exception.JwtAuthenticationEntryPoint;
 import com.api_gateway.api_gateway.security.JwtAuthenticationManager;
 import com.api_gateway.api_gateway.security.JwtServerAuthenticationConverter;
 import lombok.RequiredArgsConstructor;
@@ -7,14 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.ServerAuthenticationEntryPoint;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
-import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -24,6 +22,7 @@ public class SecurityConfiguration {
 
     private final JwtAuthenticationManager jwtAuthenticationManager;
     private final JwtServerAuthenticationConverter jwtServerAuthenticationConverter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     private static final String[] PUBLIC_ENDPOINTS = {
             // Auth Service - Public endpoints
@@ -73,15 +72,13 @@ public class SecurityConfiguration {
         // Create authentication filter
         AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(jwtAuthenticationManager);
         authenticationWebFilter.setServerAuthenticationConverter(jwtServerAuthenticationConverter);
-        // Custom entry point: return 401 without the "WWW-Authenticate" header
-        ServerAuthenticationEntryPoint noPopupEntryPoint = (exchange, ex) ->
-                Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED));
+        
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .exceptionHandling(exceptionHandlingSpec ->
-                        exceptionHandlingSpec.authenticationEntryPoint(noPopupEntryPoint) // 👈 important
+                        exceptionHandlingSpec.authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
 
                 // Add JWT authentication filter
