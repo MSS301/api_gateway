@@ -29,14 +29,18 @@ public class GatewayConfiguration {
                 .route("payment-service", r -> r.path("/payment-service/**")
                         .and()
                         .not(p -> p.path("/payment-service/v3/api-docs/**"))
-                        .filters(f -> f.rewritePath("/payment-service/(?<segment>.*)", "/payment/${segment}"))
+                        .filters(f -> f
+                                .rewritePath("/payment-service/(?<segment>.*)", "/payment/${segment}")
+                                .preserveHostHeader())
                         .uri("lb://payment-service"))
 
                 // ========== Wallet Service Routes ==========
                 .route("wallet-service", r -> r.path("/wallet-service/**")
                         .and()
                         .not(p -> p.path("/wallet-service/v3/api-docs/**"))
-                        .filters(f -> f.rewritePath("/wallet-service/(?<segment>.*)", "/wallet/${segment}"))
+                        .filters(f -> f
+                                .rewritePath("/wallet-service/(?<segment>.*)", "/wallet/${segment}")
+                                .preserveHostHeader())
                         .uri("lb://wallet-service"))
 
                 // ========== OpenAPI Documentation Routes ==========
