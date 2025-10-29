@@ -85,6 +85,8 @@ public class SecurityConfiguration {
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .authorizeExchange(exchanges -> exchanges
+                        // Allow CORS preflight requests through security
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // ========== PUBLIC ENDPOINTS ==========
                         .pathMatchers(PUBLIC_ENDPOINTS).permitAll()
 
