@@ -15,14 +15,30 @@ public class GatewayConfiguration {
                 .route("auth-service", r -> r.path("/auth-service/**")
                         .and()
                         .not(p -> p.path("/auth-service/v3/api-docs/**"))
-                        .filters(f -> f.rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}"))
+                        .filters(f -> f
+                                .rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}")
+                                .circuitBreaker(c -> c
+                                        .setName("auth-service")
+                                        .setFallbackUri("forward:/fallback/auth-service"))
+                                .retry(config -> config
+                                        .setRetries(3)
+                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
                         .uri("lb://auth-service"))
 
                 // ========== Content Service Routes ==========
                 .route("content-service", r -> r.path("/content-service/**")
                         .and()
                         .not(p -> p.path("/content-service/v3/api-docs/**"))
-                        .filters(f -> f.rewritePath("/content-service/(?<segment>.*)", "/content/${segment}"))
+                        .filters(f -> f
+                                .rewritePath("/content-service/(?<segment>.*)", "/content/${segment}")
+                                .circuitBreaker(c -> c
+                                        .setName("content-service")
+                                        .setFallbackUri("forward:/fallback/content-service"))
+                                .retry(config -> config
+                                        .setRetries(3)
+                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
                         .uri("lb://content-service"))
 
                 // ========== Payment Service Routes ==========
@@ -31,7 +47,14 @@ public class GatewayConfiguration {
                         .not(p -> p.path("/payment-service/v3/api-docs/**"))
                         .filters(f -> f
                                 .rewritePath("/payment-service/(?<segment>.*)", "/payment/${segment}")
-                                .preserveHostHeader())
+                                .preserveHostHeader()
+                                .circuitBreaker(c -> c
+                                        .setName("payment-service")
+                                        .setFallbackUri("forward:/fallback/payment-service"))
+                                .retry(config -> config
+                                        .setRetries(3)
+                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
                         .uri("lb://payment-service"))
 
                 // ========== Wallet Service Routes ==========
@@ -40,7 +63,14 @@ public class GatewayConfiguration {
                         .not(p -> p.path("/wallet-service/v3/api-docs/**"))
                         .filters(f -> f
                                 .rewritePath("/wallet-service/(?<segment>.*)", "/wallet/${segment}")
-                                .preserveHostHeader())
+                                .preserveHostHeader()
+                                .circuitBreaker(c -> c
+                                        .setName("wallet-service")
+                                        .setFallbackUri("forward:/fallback/wallet-service"))
+                                .retry(config -> config
+                                        .setRetries(3)
+                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
                         .uri("lb://wallet-service"))
 
                 // ========== OpenAPI Documentation Routes ==========
