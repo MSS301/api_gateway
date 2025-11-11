@@ -30,7 +30,6 @@ public class SecurityConfiguration {
             "/auth-service/auth/token",
             "/auth-service/auth/introspect",
             "/auth-service/auth/refresh",
-            "/auth-service/users", // POST only (registration)
             "/auth-service/auth/email-verification",
             "/auth-service/auth/resend-verification",
             "/auth-service/auth/google",
@@ -105,6 +104,11 @@ public class SecurityConfiguration {
                 .authorizeExchange(exchanges -> exchanges
                         // Allow CORS preflight requests through security
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        
+                        // ========== SPECIFIC METHOD RESTRICTIONS (must come FIRST) ==========
+                        // Auth Service - User registration (POST only is public)
+                        .pathMatchers(HttpMethod.POST, "/auth-service/users").permitAll()
+                        
                         // ========== PUBLIC ENDPOINTS ==========
                         .pathMatchers(PUBLIC_ENDPOINTS).permitAll()
 

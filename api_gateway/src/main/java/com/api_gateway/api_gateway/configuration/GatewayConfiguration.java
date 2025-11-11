@@ -16,14 +16,7 @@ public class GatewayConfiguration {
                         .and()
                         .not(p -> p.path("/auth-service/v3/api-docs/**"))
                         .filters(f -> f
-                                .rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}")
-                                .circuitBreaker(c -> c
-                                        .setName("auth-service")
-                                        .setFallbackUri("forward:/fallback/auth-service"))
-                                .retry(config -> config
-                                        .setRetries(3)
-                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
-                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
+                                .rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}"))
                         .uri("lb://auth-service"))
 
                 // ========== Content Service Routes ==========
