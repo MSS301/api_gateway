@@ -41,6 +41,7 @@ public class SecurityConfiguration {
             "/auth-service/auth/google/**",
 
             // Direct auth service access (when bypassing gateway)
+            "/auth/**", // Auth service context path
             "/login/**",
             "/oauth2/**",
 
@@ -134,6 +135,8 @@ public class SecurityConfiguration {
 
                         // ========== AUTH SERVICE ==========
                         .pathMatchers(HttpMethod.GET, "/auth-service/users/**").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/auth-service/user-profiles/me").authenticated()
+                        .pathMatchers("/auth-service/user-profiles/**").authenticated()
 
                         // ========== DEFAULT ==========
                         .anyExchange().authenticated()
