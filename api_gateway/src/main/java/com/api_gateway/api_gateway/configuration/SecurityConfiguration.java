@@ -73,6 +73,14 @@ public class SecurityConfiguration {
             "/*/actuator/health",
             "/actuator/**",
 
+            // AI Service Chatbot - Health check endpoint
+            "/ai-service/",
+            "/ai_service/",
+            
+            // AI Service Chatbot - OpenAPI docs (for Swagger UI)
+            "/ai-service/docs/**",
+            "/ai-service/openapi.json",
+
             // Favicon
             "/favicon.ico"
     };
@@ -137,6 +145,20 @@ public class SecurityConfiguration {
                         .pathMatchers(HttpMethod.GET, "/auth-service/users/**").authenticated()
                         .pathMatchers(HttpMethod.GET, "/auth-service/user-profiles/me").authenticated()
                         .pathMatchers("/auth-service/user-profiles/**").authenticated()
+
+                        // ========== AI SERVICE CHATBOT ==========
+                        // Admin endpoints - require ADMIN role
+                        .pathMatchers("/ai-service/ingestion/**").hasRole("ADMIN")
+                        
+                        // Authenticated endpoints - require authentication
+                        .pathMatchers(HttpMethod.POST, "/ai-service/rag/**").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/ai-service/rag/**").authenticated()
+                        .pathMatchers("/ai-service/grades/**").authenticated()
+                        .pathMatchers("/ai-service/books/**").authenticated()
+                        .pathMatchers("/ai-service/chapters/**").authenticated()
+                        .pathMatchers("/ai-service/lessons/**").authenticated()
+                        .pathMatchers("/ai-service/subjects/**").authenticated()
+                        .pathMatchers("/ai-service/slides/**").authenticated()
 
                         // ========== DEFAULT ==========
                         .anyExchange().authenticated()

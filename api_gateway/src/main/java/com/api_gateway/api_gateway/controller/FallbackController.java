@@ -84,5 +84,21 @@ public class FallbackController {
 
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
+
+    @GetMapping("/ai-service")
+    @PostMapping("/ai-service")
+    public ResponseEntity<Map<String, Object>> aiServiceFallback() {
+        log.error("AI Service Chatbot is currently unavailable - Circuit Breaker OPEN");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
+        response.put("error", "Service Unavailable");
+        response.put("message", "AI Service Chatbot is temporarily unavailable. Please try again later.");
+        response.put("service", "ai-service");
+        response.put("circuitBreaker", "OPEN");
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
 }
 
