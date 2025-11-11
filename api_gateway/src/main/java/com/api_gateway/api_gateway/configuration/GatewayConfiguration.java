@@ -99,7 +99,25 @@ public class GatewayConfiguration {
                 .route("payment-service-openapi", r -> r.path("/payment-service/v3/api-docs/**")
                         .filters(f -> f.rewritePath("/payment-service/(?<segment>.*)", "/payment/${segment}"))
                         .uri("lb://payment-service"))
+                // ========== Mindmap Service Routes ==========
+                .route("mindmap-service", r -> r.path("/mindmap-service/**")
+                        .and()
+                        .not(p -> p.path("/mindmap-service/v3/api-docs/**"))
+                        .filters(f -> f
+                                .rewritePath("/mindmap-service/(?<segment>.*)", "/mindmap-service/${segment}")
+                                .circuitBreaker(c -> c
+                                        .setName("mindmap-service")
+                                        .setFallbackUri("forward:/fallback/mindmap-service"))
+                                .retry(config -> config
+                                        .setRetries(3)
+                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                                                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
+                        .uri("lb://mindmap-service"))
 
+                // Mindmap Service OpenAPI
+                .route("mindmap-service-openapi", r -> r.path("/mindmap-service/v3/api-docs/**")
+                        .filters(f -> f.rewritePath("/mindmap-service/(?<segment>.*)", "/mindmap-service/${segment}"))
+                        .uri("lb://mindmap-service"))
                 // Wallet Service OpenAPI
                 .route("wallet-service-openapi", r -> r.path("/wallet-service/v3/api-docs/**")
                         .filters(f -> f.rewritePath("/wallet-service/(?<segment>.*)", "/wallet/${segment}"))

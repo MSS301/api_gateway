@@ -52,7 +52,21 @@ public class FallbackController {
 
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
+    @GetMapping("/mindmap-service")
+    @PostMapping("/mindmap-service")
+    public ResponseEntity<Map<String, Object>> mindmapServiceFallback() {
+        log.error("Mindmap service is currently unavailable - Circuit Breaker OPEN");
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
+        response.put("error", "Service Unavailable");
+        response.put("message", "Mindmap service is temporarily unavailable. Please try again later.");
+        response.put("service", "mindmap-service");
+        response.put("circuitBreaker", "OPEN");
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
     @GetMapping("/payment-service")
     @PostMapping("/payment-service")
     public ResponseEntity<Map<String, Object>> paymentServiceFallback() {
