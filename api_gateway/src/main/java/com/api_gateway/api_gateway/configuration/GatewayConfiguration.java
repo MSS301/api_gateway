@@ -118,6 +118,7 @@ public class GatewayConfiguration {
 
                 // ========== AI Service Chatbot Routes ==========
                 // AI Service Chatbot (Python FastAPI on port 8000)
+                // Route 1: /ai-service/** (legacy)
                 .route("ai-service", r -> r.path("/ai-service/**")
                         .and()
                         .not(p -> p.path("/ai-service/docs/**"))
@@ -125,6 +126,31 @@ public class GatewayConfiguration {
                         .not(p -> p.path("/ai-service/openapi.json"))
                         .filters(f -> f
                                 .rewritePath("/ai-service/(?<segment>.*)", "/${segment}")
+                                .setResponseHeader("Access-Control-Allow-Origin", "*")
+                                .setResponseHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+                                .setResponseHeader("Access-Control-Allow-Headers", "*")
+                                .setResponseHeader("Access-Control-Expose-Headers", "*")
+                                .circuitBreaker(c -> c
+                                        .setName("ai-service")
+                                        .setFallbackUri("forward:/fallback/ai-service"))
+                                .retry(config -> config
+                                        .setRetries(3)
+                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
+                        .uri("http://localhost:8000"))
+                
+                // Route 2: /ai-chatbot-service/** (new naming convention)
+                .route("ai-chatbot-service", r -> r.path("/ai-chatbot-service/**")
+                        .and()
+                        .not(p -> p.path("/ai-chatbot-service/docs/**"))
+                        .and()
+                        .not(p -> p.path("/ai-chatbot-service/openapi.json"))
+                        .filters(f -> f
+                                .rewritePath("/ai-chatbot-service/(?<segment>.*)", "/${segment}")
+                                .setResponseHeader("Access-Control-Allow-Origin", "*")
+                                .setResponseHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+                                .setResponseHeader("Access-Control-Allow-Headers", "*")
+                                .setResponseHeader("Access-Control-Expose-Headers", "*")
                                 .circuitBreaker(c -> c
                                         .setName("ai-service")
                                         .setFallbackUri("forward:/fallback/ai-service"))
@@ -150,6 +176,24 @@ public class GatewayConfiguration {
                                 .setResponseHeader("Access-Control-Allow-Methods", "GET, OPTIONS")
                                 .setResponseHeader("Access-Control-Allow-Headers", "*")
                                 .rewritePath("/ai-service/openapi.json", "/openapi.json"))
+                        .uri("http://localhost:8000"))
+                
+                // AI Chatbot Service OpenAPI docs proxy
+                .route("ai-chatbot-service-docs", r -> r.path("/ai-chatbot-service/docs/**")
+                        .filters(f -> f
+                                .rewritePath("/ai-chatbot-service/docs/(?<segment>.*)", "/docs/${segment}")
+                                .setResponseHeader("Access-Control-Allow-Origin", "*")
+                                .setResponseHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                                .setResponseHeader("Access-Control-Allow-Headers", "*"))
+                        .uri("http://localhost:8000"))
+
+                // AI Chatbot Service OpenAPI JSON proxy
+                .route("ai-chatbot-service-openapi", r -> r.path("/ai-chatbot-service/openapi.json")
+                        .filters(f -> f
+                                .setResponseHeader("Access-Control-Allow-Origin", "*")
+                                .setResponseHeader("Access-Control-Allow-Methods", "GET, OPTIONS")
+                                .setResponseHeader("Access-Control-Allow-Headers", "*")
+                                .rewritePath("/ai-chatbot-service/openapi.json", "/openapi.json"))
                         .uri("http://localhost:8000"))
 
                 .build();

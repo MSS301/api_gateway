@@ -75,10 +75,13 @@ public class SecurityConfiguration {
             // AI Service Chatbot - Health check endpoint
             "/ai-service/",
             "/ai_service/",
+            "/ai-chatbot-service/",
             
             // AI Service Chatbot - OpenAPI docs (for Swagger UI)
             "/ai-service/docs/**",
             "/ai-service/openapi.json",
+            "/ai-chatbot-service/docs/**",
+            "/ai-chatbot-service/openapi.json",
 
             // Favicon
             "/favicon.ico"
@@ -153,6 +156,7 @@ public class SecurityConfiguration {
                         // ========== AI SERVICE CHATBOT ==========
                         // Admin endpoints - require ADMIN role
                         .pathMatchers("/ai-service/ingestion/**").hasRole("ADMIN")
+                        .pathMatchers("/ai-chatbot-service/ingestion/**").hasRole("ADMIN")
                         
                         // Authenticated endpoints - require authentication
                         .pathMatchers(HttpMethod.POST, "/ai-service/rag/**").authenticated()
@@ -163,6 +167,16 @@ public class SecurityConfiguration {
                         .pathMatchers("/ai-service/lessons/**").authenticated()
                         .pathMatchers("/ai-service/subjects/**").authenticated()
                         .pathMatchers("/ai-service/slides/**").authenticated()
+                        
+                        // AI Chatbot Service (new naming) - same rules
+                        .pathMatchers(HttpMethod.POST, "/ai-chatbot-service/rag/**").authenticated()
+                        .pathMatchers(HttpMethod.GET, "/ai-chatbot-service/rag/**").authenticated()
+                        .pathMatchers("/ai-chatbot-service/grades/**").authenticated()
+                        .pathMatchers("/ai-chatbot-service/books/**").authenticated()
+                        .pathMatchers("/ai-chatbot-service/chapters/**").authenticated()
+                        .pathMatchers("/ai-chatbot-service/lessons/**").authenticated()
+                        .pathMatchers("/ai-chatbot-service/subjects/**").authenticated()
+                        .pathMatchers("/ai-chatbot-service/slides/**").authenticated()
 
                         // ========== DEFAULT ==========
                         .anyExchange().authenticated()
