@@ -42,6 +42,16 @@ public class GatewayConfiguration {
                         .uri("lb://content-service"))
 
                 // ========== Payment Service Routes ==========
+                // Direct /payment/** routes (for webhooks and callbacks)
+                .route("payment-direct", r -> r.path("/payment/**")
+                        .filters(f -> f
+                                .preserveHostHeader()
+                                .circuitBreaker(c -> c
+                                        .setName("payment-service")
+                                        .setFallbackUri("forward:/fallback/payment-service")))
+                        .uri("lb://payment-service"))
+                
+                // /payment-service/** routes (standard API calls)
                 .route("payment-service", r -> r.path("/payment-service/**")
                         .and()
                         .not(p -> p.path("/payment-service/v3/api-docs/**"))

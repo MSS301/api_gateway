@@ -45,9 +45,18 @@ public class SecurityConfiguration {
             "/oauth2/**",
 
             // Payment Service - Webhooks (must be public for external services)
+            "/payment-service/webhook",
+            "/payment-service/webhooks/**",
+            "/payment-service/return",
+            "/payment-service/cancel",
             "/payment-service/payment/webhook",
+            "/payment-service/payment/webhooks/**",
             "/payment-service/payment/return",
             "/payment-service/payment/cancel",
+            "/payment/webhook",
+            "/payment/webhooks/**",
+            "/payment/return",
+            "/payment/cancel",
 
             // API Documentation - Public access
             "/*/v3/api-docs/**",
