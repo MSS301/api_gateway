@@ -19,6 +19,16 @@ public class GatewayConfiguration {
                                 .rewritePath("/auth-service/(?<segment>.*)", "/auth/${segment}"))
                         .uri("lb://auth-service"))
 
+                // ========== AI Service Chatbot Routes (MUST BE BEFORE content-service) ==========
+                // Route 2: /ai-chatbot-service/** (new naming convention)
+                // MUST BE DEFINED BEFORE content-service route to avoid path conflicts
+                // CORS is handled by CorsWebFilter in WebClientConfiguration, no need to set headers here
+                // Simplified route for debugging - removed all predicates except path
+                .route("ai-chatbot-service", r -> r.path("/ai-chatbot-service/**")
+                        .filters(f -> f
+                                .rewritePath("/ai-chatbot-service/(?<segment>.*)", "/${segment}"))
+                        .uri("http://localhost:8000"))
+
                 // ========== Content Service Routes ==========
                 .route("content-service", r -> r.path("/content-service/**")
                         .and()
@@ -119,6 +129,7 @@ public class GatewayConfiguration {
                 // ========== AI Service Chatbot Routes ==========
                 // AI Service Chatbot (Python FastAPI on port 8000)
                 // Route 1: /ai-service/** (legacy)
+                // CORS is handled by CorsWebFilter in WebClientConfiguration, no need to set headers here
                 .route("ai-service", r -> r.path("/ai-service/**")
                         .and()
                         .not(p -> p.path("/ai-service/docs/**"))
@@ -126,31 +137,6 @@ public class GatewayConfiguration {
                         .not(p -> p.path("/ai-service/openapi.json"))
                         .filters(f -> f
                                 .rewritePath("/ai-service/(?<segment>.*)", "/${segment}")
-                                .setResponseHeader("Access-Control-Allow-Origin", "*")
-                                .setResponseHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
-                                .setResponseHeader("Access-Control-Allow-Headers", "*")
-                                .setResponseHeader("Access-Control-Expose-Headers", "*")
-                                .circuitBreaker(c -> c
-                                        .setName("ai-service")
-                                        .setFallbackUri("forward:/fallback/ai-service"))
-                                .retry(config -> config
-                                        .setRetries(3)
-                                        .setStatuses(org.springframework.http.HttpStatus.BAD_GATEWAY,
-                                                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)))
-                        .uri("http://localhost:8000"))
-                
-                // Route 2: /ai-chatbot-service/** (new naming convention)
-                .route("ai-chatbot-service", r -> r.path("/ai-chatbot-service/**")
-                        .and()
-                        .not(p -> p.path("/ai-chatbot-service/docs/**"))
-                        .and()
-                        .not(p -> p.path("/ai-chatbot-service/openapi.json"))
-                        .filters(f -> f
-                                .rewritePath("/ai-chatbot-service/(?<segment>.*)", "/${segment}")
-                                .setResponseHeader("Access-Control-Allow-Origin", "*")
-                                .setResponseHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
-                                .setResponseHeader("Access-Control-Allow-Headers", "*")
-                                .setResponseHeader("Access-Control-Expose-Headers", "*")
                                 .circuitBreaker(c -> c
                                         .setName("ai-service")
                                         .setFallbackUri("forward:/fallback/ai-service"))
